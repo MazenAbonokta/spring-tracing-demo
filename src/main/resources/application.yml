@@ -1,0 +1,19 @@
+server:
+  port: 8089
+
+logging:
+  level:
+    com:
+      tech4:
+        com:
+          tracing: debug
+  pattern:
+    level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+spring:
+  application:
+    name:tracing-demo

@@ -1,0 +1,82 @@
+version: '3.8'
+
+networks:
+  monitoring-network:
+
+services:
+
+  prometheus:
+    image: prom/prometheus:latest
+    restart: always
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - monitoring-network
+
+  loki:
+    image: grafana/loki:latest
+    restart: always
+    user: root
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./observability/loki-config.yml:/etc/loki/local-config.yml
+      - ./loki-data:/loki
+    command: [ "-config.file=/etc/loki/local-config.yml" ]
+    depends_on:
+      - minio
+    networks:
+      - monitoring-network
+
+  promtail:
+    image: grafana/promtail:latest
+    restart: always
+    volumes:
+      - ./observability/promtail-config.yml:/etc/promtail/promtail-config.yml
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: [ "-config.file=/etc/promtail/promtail-config.yml" ]
+    depends_on:
+      - loki
+    networks:
+      - monitoring-network
+
+  tempo:
+    image: grafana/tempo:latest
+    restart: always
+    ports:
+      - "3200:3200"
+      - "4317:4317"
+      - "4318:4318"
+    volumes:
+      - ./tempo.yml:/etc/tempo.yml
+    command: [ "-config.file=/etc/tempo.yml" ]
+    networks:
+      - monitoring-network
+
+  grafana:
+    image: grafana/grafana:latest
+    restart: always
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
+      - loki
+      - tempo
+    networks:
+      - monitoring-network
+  spring-boot-app:
+    build: ..
+    restart: always
+    ports:
+      - "8089:8089"
+    environment:
+      JAVA_TOOL_OPTIONS: "-javaagent:/app/libs/opentelemetry-javaagent-1.32.0.jar"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4317
+      SPRING_APPLICATION_NAME: tracing-demo
+
+    networks:
+      - monitoring-network
