@@ -71,7 +71,7 @@ mvn spring-boot:run
 To **build and run** all services using Docker, execute:
 
 ```sh
-docker-compose up --build -d
+docker/docker-compose up --build -d
 ```
 
 This will:
@@ -83,19 +83,19 @@ This will:
   - **Loki** on `http://localhost:3100`
   - **Tempo** on `http://localhost:3200`
 
-### 🚫 Stop the Stack
+### 🛑 Stop the Stack
 
 To stop and remove the running containers, run:
 
 ```sh
-docker-compose down
+docker/docker-compose down
 ```
 
 ---
 
 ## ⚙️ Configuration & Deployment
 
-The **docker-compose.yml** file is used to deploy the full observability stack, including:
+The **docker/docker-compose.yml** file is used to deploy the full observability stack, including:
 - **Spring Boot Application** (`spring-tracing-demo`)
 - **Loki** (for log aggregation)
 - **Promtail** (to collect logs and forward to Loki)
@@ -103,9 +103,29 @@ The **docker-compose.yml** file is used to deploy the full observability stack, 
 - **Prometheus** (for metrics collection)
 - **Grafana** (for visualization)
 
-#### 🗄 **docker-compose.yml**
+#### 📄 **docker/docker-compose.yml**
 
-See the `docker-compose.yml` file for the complete configuration.
+See the `docker/docker-compose.yml` file for the complete configuration.
+
+---
+
+## 📂 Observability Configuration Files
+
+The following configuration files are located in `docker/observability/`:
+
+### 🔧 **Loki Configuration (`loki-config.yml`)**
+Defines how logs are stored and queried in Loki.
+
+### 🔧 **Prometheus Configuration (`prometheus.yml`)**
+Defines Prometheus scraping jobs and metrics collection settings.
+
+### 🔧 **Promtail Configuration (`promtail-config.yml`)**
+Configures Promtail to collect logs and send them to Loki.
+
+### 🔧 **Tempo Configuration (`tempo.yml`)**
+Configures Tempo for distributed tracing.
+
+These configuration files ensure proper integration and observability of logs and traces.
 
 ---
 
